@@ -1,12 +1,10 @@
 # Dockerfile
 FROM php:8.2-fpm
 
-USER $USER
-
-
 # Instalações necessárias
 RUN apt-get update && apt-get install -y \
     libpq-dev \
+    libicu-dev \
     zip \
     unzip \
     git \
@@ -14,7 +12,9 @@ RUN apt-get update && apt-get install -y \
 
 RUN docker-php-ext-install \
     pdo \
-    pdo_pgsql
+    pdo_pgsql \
+    intl \
+    opcache
 
 RUN pecl install xdebug \
     && docker-php-ext-enable xdebug \
