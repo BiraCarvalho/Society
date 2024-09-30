@@ -45,13 +45,29 @@ class EmpresaController extends AbstractController
         }
 
         $data = json_decode($request->getContent(), true);
-        
+
         $empresa->setNome($data['nome'] ?? $empresa->getNome());
         $empresa->setCnpj($data['cnpj'] ?? $empresa->getCnpj());
-        
+
         $entityManager->flush();
 
         return new JsonResponse(['status' => 'Empresa atualizada'], JsonResponse::HTTP_OK);
+    }
+
+
+    #[Route('/api/empresa/{id}', methods: ['DELETE'])]
+    public function delete(int $id, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $empresa = $entityManager->getRepository(Empresa::class)->find($id);
+
+        if (!$empresa) {
+            return new JsonResponse(['status' => 'Empresa não encontrada'], JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        $entityManager->remove($empresa);
+        $entityManager->flush();
+
+        return new JsonResponse(['status' => 'Empresa removida'], JsonResponse::HTTP_OK);
     }
 
     #[Route('/api/empresa/{id}/socios', methods: ['POST'])]
@@ -80,5 +96,33 @@ class EmpresaController extends AbstractController
         $entityManager->flush();
 
         return new JsonResponse(['status' => 'Sócios vinculados à empresa'], JsonResponse::HTTP_OK);
+    }
+
+    #[Route('/api/empresa/{id}/socios', methods: ['DELETE'])]
+    public function removeSocios(int $id, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $empresa = $entityManager->getRepository(Empresa::class)->find($id);
+
+        if (!$empresa) {
+            return new JsonResponse(['status' => 'Empresa não encontrada'], JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        $sociosIds = $data['socios'] ?? [];
+
+        foreach ($sociosIds as $socioId) {
+            $socio = $entityManager->getRepository(Socio::class)->find($socioId);
+
+            if (!$socio) {
+                return new JsonResponse(['status' => "Sócio com ID {$socioId} não encontrado"], JsonResponse::HTTP_NOT_FOUND);
+            }
+
+            // Remove o sócio da empresa
+            $empresa->removeSocio($socio);
+        }
+
+        $entityManager->flush();
+
+        return new JsonResponse(['status' => 'Sócios removidos da empresa'], JsonResponse::HTTP_OK);
     }
 }

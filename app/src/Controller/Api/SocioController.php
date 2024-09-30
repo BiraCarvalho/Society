@@ -36,4 +36,38 @@ class SocioController extends AbstractController
             JsonResponse::HTTP_CREATED
         );
     }
+
+    #[Route('/api/socio/{id}', methods: ['PUT'])]
+    public function update(int $id, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $socio = $entityManager->getRepository(Socio::class)->find($id);
+
+        if (!$socio) {
+            return new JsonResponse(['status' => 'Sócio não encontrado'], JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        $data = json_decode($request->getContent(), true);
+
+        $socio->setNome($data['nome'] ?? $socio->getNome());
+        $socio->setCpf($data['cpf'] ?? $socio->getCpf());
+
+        $entityManager->flush();
+
+        return new JsonResponse(['status' => 'Sócio atualizado'], JsonResponse::HTTP_OK);
+    }
+
+    #[Route('/api/socio/{id}', methods: ['DELETE'])]
+    public function delete(int $id, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $socio = $entityManager->getRepository(Socio::class)->find($id);
+
+        if (!$socio) {
+            return new JsonResponse(['status' => 'Sócio não encontrado'], JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        $entityManager->remove($socio);
+        $entityManager->flush();
+
+        return new JsonResponse(['status' => 'Sócio removido'], JsonResponse::HTTP_OK);
+    }
 }
