@@ -32,28 +32,11 @@ services:
     ports:
       - "9000:9000"
 
-  nodejs:
-    build:
-      dockerfile: docker/node/Dockerfile  # Especifica o nome do Dockerfile
-    image: node-custom:lts
-    container_name: nodejs
-    working_dir: /usr/src/app
-    volumes:
-      - ./app/angular:/usr/src/app
-    ports:
-      - "4200:4200"
-    environment:
-      - NODE_ENV=development
-    depends_on:
-      - php
-    networks:
-      - symfony
-
   nginx:
     image: nginx:latest
     container_name: nginx
     ports:
-      - "8443:443"
+      - "8000:80"
     volumes:
       - ./app:/var/www/html
       - ./docker/nginx.conf:/etc/nginx/nginx.conf
