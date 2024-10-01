@@ -2,7 +2,7 @@ services:
 
   db:
     image: postgres:13
-    container_name: postgres
+    container_name: postgres-desafio
     environment:
       POSTGRES_DB: symfony
       POSTGRES_USER: postgres
@@ -10,22 +10,22 @@ services:
     ports:
       - "54320:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_desafio:/var/lib/postgresql/data
     networks:
-      - symfony
+      - symfony-desafio
 
   php:
     build:
       dockerfile: docker/php/Dockerfile  # Especifica o nome do Dockerfile
     image: php-custom:8.2
-    container_name: php
+    container_name: php-desafio
     volumes:
       - ./app/symfony:/var/www/html
       - ./docker/php/php.ini:/usr/local/etc/php/php.ini
     depends_on:
       - db
     networks:
-      - symfony
+      - symfony-desafio
     working_dir: /var/www/html
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -34,7 +34,7 @@ services:
 
   nginx:
     image: nginx:latest
-    container_name: nginx
+    container_name: nginx-desafio
     ports:
       - "8000:80"
     volumes:
@@ -44,11 +44,11 @@ services:
     depends_on:
       - php
     networks:
-      - symfony
+      - symfony-desafio
 
 volumes:
-  postgres_data:
+  postgres_data_desafio:
 
 networks:
-  symfony:
+  symfony-desafio:
     driver: bridge
